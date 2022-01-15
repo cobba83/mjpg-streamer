@@ -63,6 +63,7 @@ void help(void)
             " [-p | --port ]..........: TCP port for this HTTP server\n" \
 	    " [-l ] --listen ]........: Listen on Hostname / IP\n" \
             " [-c | --credentials ]...: ask for \"username:password\" on connect\n" \
+            " [-g | --guestcredentials ]...: ask for \"username:password\" on connect\n" \
             " [-n | --nocommands ]....: disable execution of commands\n"
             " ---------------------------------------------------------------\n");
 }
@@ -81,13 +82,14 @@ int output_init(output_parameter *param, int id)
 {
     int i;
     int  port;
-    char *credentials, *www_folder, *hostname = NULL;
+    char *credentials, *guestcredentials, *www_folder, *hostname = NULL;
     char nocommands;
 
     DBG("output #%02d\n", param->id);
 
     port = htons(8080);
     credentials = NULL;
+    guestcredentials = NULL;
     www_folder = NULL;
     nocommands = 0;
 
@@ -111,6 +113,8 @@ int output_init(output_parameter *param, int id)
 	    {"listen", required_argument, 0, 0},
             {"c", required_argument, 0, 0},
             {"credentials", required_argument, 0, 0},
+            {"g", required_argument, 0, 0},
+            {"guestcredentials", required_argument, 0, 0},
             {"w", required_argument, 0, 0},
             {"www", required_argument, 0, 0},
             {"n", no_argument, 0, 0},
@@ -159,10 +163,17 @@ int output_init(output_parameter *param, int id)
             credentials = strdup(optarg);
             break;
 
-            /* w, www */
+            /* g, guestcredentials */
         case 8:
         case 9:
             DBG("case 8,9\n");
+            guestcredentials = strdup(optarg);
+            break;
+
+            /* w, www */
+        case 10:
+        case 11:
+            DBG("case 10,11\n");
             www_folder = malloc(strlen(optarg) + 2);
             strcpy(www_folder, optarg);
             if(optarg[strlen(optarg)-1] != '/')
@@ -170,9 +181,9 @@ int output_init(output_parameter *param, int id)
             break;
 
             /* n, nocommands */
-        case 10:
-        case 11:
-            DBG("case 10,11\n");
+        case 12:
+        case 13:
+            DBG("case 12,13\n");
             nocommands = 1;
             break;
         }
@@ -183,6 +194,7 @@ int output_init(output_parameter *param, int id)
     servers[param->id].conf.port = port;
     servers[param->id].conf.hostname = hostname;
     servers[param->id].conf.credentials = credentials;
+    servers[param->id].conf.guestcredentials = guestcredentials;
     servers[param->id].conf.www_folder = www_folder;
     servers[param->id].conf.nocommands = nocommands;
 
@@ -190,6 +202,7 @@ int output_init(output_parameter *param, int id)
     OPRINT("HTTP TCP port........: %d\n", ntohs(port));
     OPRINT("HTTP Listen Address..: %s\n", hostname);
     OPRINT("username:password....: %s\n", (credentials == NULL) ? "disabled" : credentials);
+    OPRINT("username:password....: %s\n", (guestcredentials == NULL) ? "disabled" : guestcredentials);
     OPRINT("commands.............: %s\n", (nocommands) ? "disabled" : "enabled");
 
     param->global->out[id].name = malloc((strlen(OUTPUT_PLUGIN_NAME) + 1) * sizeof(char));

@@ -122,6 +122,7 @@ typedef struct {
     int port;
     char *hostname;
     char *credentials;
+    char *guestcredentials;
     char *www_folder;
     char nocommands;
 } config;

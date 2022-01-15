@@ -1289,7 +1289,7 @@ void *client_thread(void *arg)
 
     /* check for username and password if parameter -c was given */
     if(lcfd.pc->conf.credentials != NULL) {
-        if(req.credentials == NULL || strcmp(lcfd.pc->conf.credentials, req.credentials) != 0) {
+        if(req.credentials == NULL || (strcmp(lcfd.pc->conf.credentials, req.credentials) != 0 &&  strcmp(lcfd.pc->conf.guestcredentials, req.credentials) != 0)) {
             DBG("access denied\n");
             send_error(lcfd.fd, 401, "username and password do not match to configuration");
             close(lcfd.fd);
